@@ -19,17 +19,17 @@ int main()
         {
             // run the function
             bool result = pTestFunc();
-            std::cout << "test function returned: " << result << std::endl;
+            std::cout << "TestFuncsTester: Test function returned " << result << "." << std::endl;
         }
         else
         {
-            std::cout << "couldn't find test function" << std::endl;
+            std::cout << "TestFuncsTester: Couldn't find test function." << std::endl;
         }
 
         FreeLibrary(hTestDll);
     }
     else
     {
-        std::cout << "coudn't find dll" << std::endl;
+        std::cout << "TestFuncsTester: Coudn't find TestFuncsA.dll." << std::endl;
     }
 }
