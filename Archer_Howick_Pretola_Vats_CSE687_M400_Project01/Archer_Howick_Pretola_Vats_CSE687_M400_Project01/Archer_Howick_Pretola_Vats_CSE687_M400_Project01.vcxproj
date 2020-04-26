@@ -152,6 +152,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Archer_Howick_Pretola_Vats_CSE687_M400_Project01.cpp" />
+    <ClCompile Include="ChildTest.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildTest.h" />

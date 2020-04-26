@@ -18,6 +18,12 @@
     <ClCompile Include="Archer_Howick_Pretola_Vats_CSE687_M400_Project01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChildTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestExecutive.h">

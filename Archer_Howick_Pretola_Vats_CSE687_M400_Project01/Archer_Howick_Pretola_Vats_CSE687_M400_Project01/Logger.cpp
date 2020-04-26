@@ -1,32 +1,43 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Author:  Archer_Howick_Pretola_Vats
-// ChildTest.h : Object Oriented Design
+// Logger.cpp : Object Oriented Design
 // Syracuse University
 // Project
 // Requirements: See file Archer_Howick_Pretola_Vats_CSE687_Project1_ArchitectureDocx002.pdf for complete
 //		project requirements, architecture, and design.
 // Parameters:  None
-// Create Date:  4/22/2020
+// Create Date:  4/25/2020
 // Revision History:
 // Date			Programmer/Developer	Reason
-// 4/22/2020	David L Howick			Original
-// 4/23/2020	Troy H Archer			Adding initial content
+// 4/25/2020	Troy H Archer			Original
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
-#include <iostream>
 #include "Logger.h"
+#include <iostream>
 
-class ChildTest
+Logger::Logger()
 {
-public:
-	ChildTest(Logger* logger);							// Constructor
-	~ChildTest();										// Destructor
-	bool test(bool(*testToExecute)());					// test
 
-private:
-	//Logger pointer, assuming that the Test Harness will create the logger and pass around the reference to it
-	//instead of each child tester having it's own logger
-	Logger* mLogger;
-};
+}
+
+Logger::~Logger()
+{
+
+}
+
+void Logger::log(LOG_LEVEL level, std::string messageFormat)
+{
+	if (level == INFO)
+	{
+		std::cout << "INFO: " << messageFormat << std::endl;
+	}
+	else if (level == DEBUG)
+	{
+		std::cout << "DEBUG: " << messageFormat << std::endl;
+	}
+	else if (level == ERROR)
+	{
+		std::cout << "ERROR: " << messageFormat << std::endl;
+	}
+}
