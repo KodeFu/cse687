@@ -17,9 +17,16 @@ int main()
         testFunc pTestFunc = (testFunc) GetProcAddress(hTestDll, "Test1");
         if (NULL != pTestFunc)
         {
-            // run the function
-            bool result = pTestFunc();
-            std::cout << "TestFuncsTester: Test function returned " << result << "." << std::endl;
+            try {
+                // run the function
+                bool result = pTestFunc();
+                std::cout << "TestFuncsTester: Test function returned " << result << "." << std::endl;
+            }
+            catch (...)
+            {
+                // catch everything; encountered an exception
+                std::cout << "TestFuncsTester: Test function encountered an exception." << std::endl;
+            }
         }
         else
         {
