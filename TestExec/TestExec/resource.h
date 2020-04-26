@@ -23,7 +23,6 @@
 #define IDC_BUTTON4                     1008
 #define IDC_RESET                       1008
 #define IDC_BUTTON5                     1009
-#define IDC_BUTTON6                     1010
 #define IDC_BROWSE                      1010
 
 // Next default values for new objects

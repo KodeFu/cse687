@@ -7,6 +7,7 @@
 #include "TestExec.h"
 #include "TestExecDlg.h"
 #include "afxdialogex.h"
+#include "TestData.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,7 +36,6 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnLbnSelchangeList1();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -48,7 +48,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-	ON_LBN_SELCHANGE(IDC_LIST1, &CAboutDlg::OnLbnSelchangeList1)
+	
 END_MESSAGE_MAP()
 
 
@@ -67,18 +67,21 @@ CTestExecDlg::CTestExecDlg(CWnd* pParent /*=nullptr*/)
 void CTestExecDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1, m_LoggerListBox);
-	DDX_Control(pDX, IDC_LIST4, m_AvailableTests);
-	DDX_Control(pDX, IDC_LIST3, m_TestQueue);
+	DDX_Control(pDX, IDC_LOGMESSAGES, m_LoggerListBox);
+	DDX_Control(pDX, IDC_AVAILABLETESTS, m_AvailableTests);
+	DDX_Control(pDX, IDC_TESTQUEUE, m_TestQueue);
 }
 
 BEGIN_MESSAGE_MAP(CTestExecDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_LBN_DBLCLK(IDC_LIST1, &CTestExecDlg::OnLbnDblclkList1)
-	ON_BN_CLICKED(IDC_BUTTON5, &CTestExecDlg::OnBnClickedButton5)
+	ON_LBN_DBLCLK(IDC_AVAILABLETESTS, &CTestExecDlg::OnLbnDblclkList1)
 	ON_BN_CLICKED(IDC_BROWSE, &CTestExecDlg::OnBnClickedBrowse)
+	ON_BN_CLICKED(IDC_COPYALL, &CTestExecDlg::OnBnClickedCopyall)
+	ON_BN_CLICKED(IDC_COPY, &CTestExecDlg::OnBnClickedCopy)
+	ON_BN_CLICKED(IDC_RESET, &CTestExecDlg::OnBnClickedReset)
+	ON_BN_CLICKED(IDC_RUNTESTS, &CTestExecDlg::OnBnClickedRuntests)
 END_MESSAGE_MAP()
 
 
@@ -169,13 +172,6 @@ HCURSOR CTestExecDlg::OnQueryDragIcon()
 
 
 
-void CAboutDlg::OnLbnSelchangeList1()
-{
-	// TODO: Add your control notification handler code here
-	MessageBox(_T("Hello"), _T("Hello2"), MB_OK);
-}
-
-
 void CTestExecDlg::OnLbnDblclkList1()
 {
 	// TODO: Add your control notification handler code here
@@ -183,28 +179,6 @@ void CTestExecDlg::OnLbnDblclkList1()
 	CString blah;
 	blah.Format(_T("Current Selection: %d"), currSel);
 	MessageBox(blah, L"Yo", MB_OK);
-}
-
-
-void CTestExecDlg::OnBnClickedButton5()
-{
-	// TODO: Add your control notification handler code here
-	m_LoggerListBox.AddString(_T("TestDLL1, Test A passed"));
-	m_LoggerListBox.AddString(_T("TestDLL1, Test C passed"));
-	m_LoggerListBox.AddString(_T("TestDLL1, Test Z failed"));
-	m_LoggerListBox.AddString(_T("TestDLL1, Test B passed"));
-
-	m_TestQueue.AddString(_T("TestDLL1, Test A"));
-	m_TestQueue.AddString(_T("TestDLL3, Test ZZZZ"));
-	m_TestQueue.AddString(_T("TestDLL2, Test CB"));
-	m_TestQueue.AddString(_T("TestDLL4, Test Zzz"));
-	m_TestQueue.AddString(_T("TestDLL2, Test Bob"));
-
-	m_AvailableTests.AddString(_T("TestDLL1, Test A"));
-	m_AvailableTests.AddString(_T("TestDLL3, Test ZZZZ"));
-	m_AvailableTests.AddString(_T("TestDLL2, Test CB"));
-	m_AvailableTests.AddString(_T("TestDLL4, Test Zzz"));
-	m_AvailableTests.AddString(_T("TestDLL2, Test Bob"));
 }
 
 
@@ -216,15 +190,16 @@ void CTestExecDlg::OnBnClickedBrowse()
 
 	if (dlg.DoModal() == IDOK)
 	{
-		CString sFilePath = dlg.GetPathName();
-		// do something
-		GetFuncNamesFromDLL(sFilePath);
+		CString filePath = dlg.GetPathName();
+		CString fileName = dlg.GetFileName();
+		
+		GetFuncNamesFromDLL(filePath, fileName);
 	}
 
 }
 
 
-void CTestExecDlg::GetFuncNamesFromDLL(CString filePath)
+void CTestExecDlg::GetFuncNamesFromDLL(CString filePath, CString fileName)
 {
 	// get a handle to the test dll
 	HINSTANCE hTestDll = LoadLibrary(filePath);
@@ -244,7 +219,17 @@ void CTestExecDlg::GetFuncNamesFromDLL(CString filePath)
 			if (NULL != pTestFunc)
 			{
 				// add the function name to the available tests
-				m_AvailableTests.AddString(funcName);
+				CString tmp;
+				tmp.Format(_T("%s --> %s()"), fileName, funcName);
+				int currItemIndex = m_AvailableTests.AddString(tmp);
+
+				// save test data
+				TestData *testData = new TestData();
+				testData->setFilePath(filePath);
+				testData->setFileName(fileName);
+				testData->setTestName(funcName);
+
+				m_AvailableTests.SetItemData(currItemIndex, (DWORD_PTR) testData);
 			}
 			else
 			{
@@ -256,5 +241,72 @@ void CTestExecDlg::GetFuncNamesFromDLL(CString filePath)
 	else
 	{
 		MessageBox(_T("Coudn't load DLL"), _T("Woops!"), MB_OK);
+	}
+
+	// set to first item
+	if (m_AvailableTests.GetCount() > 0)
+	{
+		m_AvailableTests.SetCurSel(0);
+	}
+}
+
+void CTestExecDlg::OnBnClickedCopyall()
+{
+	if (m_AvailableTests.GetCount() > 0)
+	{
+		for (int i = 0; i < m_AvailableTests.GetCount(); i++)
+		{
+			CString tmp;
+			m_AvailableTests.GetText(i, tmp);
+			int testQueueItemIndex = m_TestQueue.AddString(tmp);
+			m_TestQueue.SetItemData(testQueueItemIndex, m_AvailableTests.GetItemData(i));
+		}
+	}
+}
+
+
+void CTestExecDlg::OnBnClickedCopy()
+{
+	if (m_AvailableTests.GetCount() > 0)
+	{
+		int selectedItem = m_AvailableTests.GetCurSel();
+		if (selectedItem >= 0)
+		{
+			CString tmp;
+			m_AvailableTests.GetText(selectedItem, tmp);
+			int testQueueItemIndex = m_TestQueue.AddString(tmp);
+			m_TestQueue.SetItemData(testQueueItemIndex, m_AvailableTests.GetItemData(selectedItem));
+		}
+	}
+}
+
+
+void CTestExecDlg::OnBnClickedReset()
+{
+	m_AvailableTests.ResetContent();
+	m_TestQueue.ResetContent();
+}
+
+
+void CTestExecDlg::OnBnClickedRuntests()
+{
+	if (m_TestQueue.GetCount() > 0)
+	{
+		for (int i = 0; i < m_TestQueue.GetCount(); i++)
+		{
+			TestData *testData = (TestData *) m_TestQueue.GetItemData(i);
+			if (testData)
+			{
+				CString filePath = testData->getFilePath();
+				CString fileName = testData->getFileName();
+				CString testName = testData->getTestName();
+				
+				// enqueue test using filePath, fileName, testName
+				// ...
+				m_LoggerListBox.AddString(filePath);
+				m_LoggerListBox.AddString(fileName);
+				m_LoggerListBox.AddString(testName);
+			}
+		}
 	}
 }

@@ -35,11 +35,15 @@ public:
 	CListBox m_LoggerListBox;
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnLbnDblclkList1();
-	afx_msg void OnBnClickedButton5();
 	CListBox m_AvailableTests;
 	CListBox m_TestQueue;
 	afx_msg void OnBnClickedBrowse();
 
 private:
-	void GetFuncNamesFromDLL(CString filePath);
+	void GetFuncNamesFromDLL(CString filePath, CString fileName);
+public:
+	afx_msg void OnBnClickedCopyall();
+	afx_msg void OnBnClickedCopy();
+	afx_msg void OnBnClickedReset();
+	afx_msg void OnBnClickedRuntests();
 };
