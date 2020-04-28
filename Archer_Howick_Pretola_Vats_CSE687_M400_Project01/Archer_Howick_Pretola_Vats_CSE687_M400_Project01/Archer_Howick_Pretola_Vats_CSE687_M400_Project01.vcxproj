@@ -163,6 +163,7 @@
     <ClInclude Include="TestExecutive.h" />
     <ClInclude Include="TestHarness.h" />
     <ClInclude Include="TestRequestQueue.h" />
+    <ClInclude Include="ThreadMessageQueue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
