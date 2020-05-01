@@ -24,7 +24,7 @@ public:
 	{
 		INFO,
 		DEBUG,
-		ERROR
+		ERROR_E
 	};
 
 	Logger();										// Constructor

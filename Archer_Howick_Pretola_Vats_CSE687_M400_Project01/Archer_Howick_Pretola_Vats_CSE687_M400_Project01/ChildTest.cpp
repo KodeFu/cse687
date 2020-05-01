@@ -13,18 +13,75 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "ChildTest.h"
+#include <windows.h>
+#include <iostream>
 #include <exception>
+#include "ChildTest.h"
+
+// prototype for the test functions
+typedef bool(__stdcall* testFunc)();
+
+ChildTest::ChildTest()
+{
+	testDllName = "TestRequest01.DLL";
+	testDllFuncName = "Test1";
+}
+
 
 ChildTest::ChildTest(Logger* logger) :
 	mLogger(logger)
 {
-
+	testDllName = "TestRequest01.DLL";
+	testDllFuncName = "Test1";
 }
 
 ChildTest::~ChildTest()
 {
 
+}
+
+void ChildTest::setTestDllFuncName(std::string testName)
+{
+	testDllFuncName = testName;
+}
+
+bool ChildTest::test()
+{
+	bool result = false;
+	std::wstring wTestDllName(testDllName.begin(), testDllName.end());
+	LPCWSTR lpcwstrTestDllName = wTestDllName.c_str();
+	LPCSTR lpcstrTestDllFuncName;
+
+	// get a handle to the test dll
+	HINSTANCE hTestDll = LoadLibrary(lpcwstrTestDllName);
+	if (hTestDll != NULL)
+	{
+		// get a pointer to the function
+		// testDllFuncName = tq.dequeueTest();
+		lpcstrTestDllFuncName = testDllFuncName.c_str();
+		testFunc pTestFunc = (testFunc)GetProcAddress(hTestDll, lpcstrTestDllFuncName);
+		if (NULL != pTestFunc)
+		{
+			// run the function
+			result = pTestFunc();
+			std::cout << "TestHarness: " << testDllName << " Test Function: " << testDllFuncName
+				<< " returned " << (result ? "True" : "False") << " in the Child Test Class." << std::endl;
+		}
+		else
+		{
+			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
+			result = false;
+		}
+
+		FreeLibrary(hTestDll);
+		return result;
+	}
+	else
+	{
+		std::cout << "TestHarness: Could Not find DLL: " << testDllName << std::endl;
+		result = false;
+		return result;
+	}
 }
 
 bool ChildTest::test(bool(*testToExecute)())
@@ -41,13 +98,13 @@ bool ChildTest::test(bool(*testToExecute)())
 		}
 		else
 		{
-			mLogger->log(Logger::ERROR, "Test = false!");
+			mLogger->log(Logger::ERROR_E, "Test = false!");
 			return false;
 		}
 	}
 	catch (const std::exception& e)
 	{
-		mLogger->log(Logger::ERROR, "Exception!");
+		mLogger->log(Logger::ERROR_E, "Exception!");
 	}
 
 	//If it hasn't returned true already, return false

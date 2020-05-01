@@ -15,14 +15,113 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <string>
+#include <windows.h>
 #include "TestExecutive.h"
 #include "TestHarness.h"
 #include "TestRequestQueue.h"
-#include "Message.h"
+// #include "Message.h"
 #include "Logger.h"
 #include "LogOutputQueue.h"
+#include "ChildTest.h"
+#include "ThreadMessageQueue.h"
+
+// prototype for the test functions
+typedef bool(__stdcall* testFunc)();
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	// TestRequestQueue tq;
+	ThreadMessageQueue<Message> tq;
+	Message msg;
+
+	msg.filePath = "TestRequest01.dll";
+	msg.functionName = "Test1";
+
+	tq.Enqueue(msg);
+	Message msgD = tq.Dequeue();
+	// declare string variables for holding DLL and Function Name
+	std::string testDllName = msgD.filePath;
+	std::string testDllFuncName;
+	std::wstring wTestDllName(testDllName.begin(), testDllName.end());
+	LPCWSTR lpcwstrTestDllName = wTestDllName.c_str();
+	LPCSTR lpcstrTestDllFuncName;
+
+	// get a handle to the test dll
+	HINSTANCE hTestDll = LoadLibrary(lpcwstrTestDllName);
+	if (hTestDll != NULL)
+	{
+		// get a pointer to the function
+		testDllFuncName = msgD.functionName;
+		lpcstrTestDllFuncName = testDllFuncName.c_str();
+		testFunc pTestFunc = (testFunc)GetProcAddress(hTestDll, lpcstrTestDllFuncName);
+		if (NULL != pTestFunc)
+		{
+			// run the function
+			bool result = pTestFunc();
+			std::cout << "TestHarness: " << testDllName << " Test Function: " << testDllFuncName
+				<< " returned " << (result ? "True" : "False") << "." << std::endl;
+		}
+		else
+		{
+			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
+		}
+
+		msg.filePath = "TestRequest01.dll";
+		msg.functionName = "Test2";
+		tq.Enqueue(msg);
+		Message msgD = tq.Dequeue();
+		testDllFuncName = msgD.functionName;
+		lpcstrTestDllFuncName = testDllFuncName.c_str();
+		pTestFunc = (testFunc)GetProcAddress(hTestDll, lpcstrTestDllFuncName);
+		if (NULL != pTestFunc)
+		{
+			// run the function
+			bool result = pTestFunc();
+			std::cout << "TestHarness: " << testDllName << " Test Function: " << testDllFuncName
+				<< " returned " << (result ? "True" : "False") << "." << std::endl;
+		}
+		else
+		{
+			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
+		}
+
+		msg.filePath = "TestRequest01.dll";
+		msg.functionName = "Test3";
+		tq.Enqueue(msg);
+		msgD = tq.Dequeue();
+		testDllFuncName = msgD.functionName;
+		lpcstrTestDllFuncName = testDllFuncName.c_str();
+		pTestFunc = (testFunc)GetProcAddress(hTestDll, lpcstrTestDllFuncName);
+		if (NULL != pTestFunc)
+		{
+			// run the function
+			bool result = pTestFunc();
+			std::cout << "TestHarness: " << testDllName << " Test Function: " << testDllFuncName
+				<< " returned " << (result ? "True" : "False") << "." << std::endl;
+		}
+		else
+		{
+			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
+		}
+
+		FreeLibrary(hTestDll);
+	}
+	else
+	{
+		std::cout << "TestHarness: Could Not find DLL: " << testDllName << std::endl;
+	}
+
+	ChildTest ct1;
+	ct1.test();
+
+	std::cout << "TestHarness: " << testDllName << " Child Test Function: "
+		<< " returned " << (ct1.test() ? "True" : "False") << "." << std::endl;
+
+	ct1.setTestDllFuncName("Test2");
+
+	std::cout << "TestHarness: " << testDllName << " Child Test Function: "
+		<< " returned " << (ct1.test() ? "True" : "False") << "." << std::endl;
+
 }
+

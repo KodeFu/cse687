@@ -13,21 +13,37 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
 #include <iostream>
 #include <string>
+#include "TestRequestQueue.h"
 
-class TestRequestQueue
+
+// Constructor
+TestRequestQueue::TestRequestQueue()
 {
-public:
-	TestRequestQueue();										// Constructor
-	~TestRequestQueue();									// Destructor
-	void enqueueDll(std::string);							// enqueue function
-	std::string dequeueDll();								// dequeue function
-	void enqueueTest(std::string);							// enqueue function
-	std::string dequeueTest();								// dequeue function
+	enqueueDll("TestRequest01.DLL");
+	enqueueTest("Test1");
+}
 
-private:
-	std::string dllqueue;
-	std::string testqueue;
-};
+// Destructor
+TestRequestQueue::~TestRequestQueue() {}
+
+void TestRequestQueue::enqueueDll(std::string DllName)
+{
+	dllqueue = DllName;
+}
+
+std::string TestRequestQueue::dequeueDll()
+{
+	return dllqueue;
+}
+
+void TestRequestQueue::enqueueTest(std::string testName)
+{
+	testqueue = testName;
+}
+
+std::string TestRequestQueue::dequeueTest()
+{
+	return testqueue;
+}

@@ -16,17 +16,23 @@
 
 #pragma once
 #include <iostream>
+#include <string>
 #include "Logger.h"
 
 class ChildTest
 {
 public:
+	ChildTest();										// Constructor
 	ChildTest(Logger* logger);							// Constructor
 	~ChildTest();										// Destructor
 	bool test(bool(*testToExecute)());					// test
+	bool test();										// test
+	void setTestDllFuncName(std::string);
 
 private:
 	//Logger pointer, assuming that the Test Harness will create the logger and pass around the reference to it
 	//instead of each child tester having it's own logger
 	Logger* mLogger;
+	std::string testDllName;
+	std::string testDllFuncName;
 };

@@ -36,7 +36,7 @@ void Logger::log(LOG_LEVEL level, std::string messageFormat)
 	{
 		std::cout << "DEBUG: " << messageFormat << std::endl;
 	}
-	else if (level == ERROR)
+	else if (level == ERROR_E)
 	{
 		std::cout << "ERROR: " << messageFormat << std::endl;
 	}

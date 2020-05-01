@@ -39,6 +39,7 @@ struct Message
 	unsigned int destAddr; /* message destination address */
 	unsigned int destPort; /* message destination port */
 	string messageType; /* message type identifier */
+	string functionName; /* function name */
 	chrono::time_point<system_clock> timeStamp; /* The time for the message */
 	string filePath; /* the full file path to the test DLL */
 	unsigned int testNumber; /* the test number to execute */
