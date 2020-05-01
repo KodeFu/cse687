@@ -23,7 +23,7 @@ typedef bool(__stdcall* testFunc)();
 
 ChildTest::ChildTest()
 {
-	testDllName = "TestRequest01.DLL";
+	testDllName = "TestFuncsA.DLL";
 	testDllFuncName = "Test1";
 }
 
@@ -31,7 +31,7 @@ ChildTest::ChildTest()
 ChildTest::ChildTest(Logger* logger) :
 	mLogger(logger)
 {
-	testDllName = "TestRequest01.DLL";
+	testDllName = "TestFuncsA.DLL";
 	testDllFuncName = "Test1";
 }
 

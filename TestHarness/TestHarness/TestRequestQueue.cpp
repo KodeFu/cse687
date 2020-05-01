@@ -21,7 +21,7 @@
 // Constructor
 TestRequestQueue::TestRequestQueue()
 {
-	enqueueDll("TestRequest01.DLL");
+	enqueueDll("TestFuncsA.DLL");
 	enqueueTest("Test1");
 }
 

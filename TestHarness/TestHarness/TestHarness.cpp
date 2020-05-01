@@ -35,7 +35,7 @@ int main()
 	ThreadMessageQueue<Message> tq;
 	Message msg;
 
-	msg.filePath = "TestRequest01.dll";
+	msg.filePath = "TestFuncsA.dll";
 	msg.functionName = "Test1";
 
 	tq.Enqueue(msg);
@@ -67,7 +67,7 @@ int main()
 			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
 		}
 
-		msg.filePath = "TestRequest01.dll";
+		msg.filePath = "TestFuncsA.dll";
 		msg.functionName = "Test2";
 		tq.Enqueue(msg);
 		Message msgD = tq.Dequeue();
@@ -86,8 +86,8 @@ int main()
 			std::cout << "TestHarness: " << testDllName << " Couldn't find test function." << std::endl;
 		}
 
-		msg.filePath = "TestRequest01.dll";
-		msg.functionName = "Test3";
+		msg.filePath = "TestFuncsA.dll";
+		msg.functionName = "Test4";
 		tq.Enqueue(msg);
 		msgD = tq.Dequeue();
 		testDllFuncName = msgD.functionName;
