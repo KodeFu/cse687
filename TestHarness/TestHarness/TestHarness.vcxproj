@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{6815D096-1786-428E-8C7E-AC0A60357720}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ArcherHowickPretolaVatsCSE687M400Project01</RootNamespace>
+    <RootNamespace>TestHarness</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -151,7 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Archer_Howick_Pretola_Vats_CSE687_M400_Project01.cpp" />
+    <ClCompile Include="TestHarness.cpp" />
     <ClCompile Include="ChildTest.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="TestRequestQueue.cpp" />

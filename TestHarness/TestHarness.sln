@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Archer_Howick_Pretola_Vats_CSE687_M400_Project01", "Archer_Howick_Pretola_Vats_CSE687_M400_Project01\Archer_Howick_Pretola_Vats_CSE687_M400_Project01.vcxproj", "{6815D096-1786-428E-8C7E-AC0A60357720}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestHarness", "TestHarness\TestHarness.vcxproj", "{6815D096-1786-428E-8C7E-AC0A60357720}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
