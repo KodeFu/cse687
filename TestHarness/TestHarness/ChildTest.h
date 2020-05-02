@@ -19,20 +19,18 @@
 #include <string>
 #include "Logger.h"
 
+// Typedef the function pointer
+typedef bool(__stdcall* testFunc)();
+
 class ChildTest
 {
 public:
 	ChildTest();										// Constructor
 	ChildTest(Logger* logger);							// Constructor
 	~ChildTest();										// Destructor
-	bool test(bool(*testToExecute)());					// test
-	bool test();										// test
-	void setTestDllFuncName(std::string);
+	bool test(testFunc testToExecute);					// Test with passed in function pointer
 
 private:
-	//Logger pointer, assuming that the Test Harness will create the logger and pass around the reference to it
-	//instead of each child tester having it's own logger
+	//Logger pointer
 	Logger* mLogger;
-	std::string testDllName;
-	std::string testDllFuncName;
 };
