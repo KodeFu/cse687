@@ -16,6 +16,7 @@
 
 #pragma once
 #include <iostream>
+#include "ThreadMessageQueue.h"
 
 class Logger
 {
@@ -27,10 +28,10 @@ public:
 		ERROR_E
 	};
 
-	Logger();										// Constructor
-	~Logger();										// Destructor
-	void log(LOG_LEVEL level, std::string messageFormat);		// log function.  Writes to log queue.
+	Logger(ThreadMessageQueue<Message>* msgQueue);			// Constructor
+	~Logger();												// Destructor
+	void log(LOG_LEVEL level, std::string messageFormat);	// log function.  Writes to log queue.
 
 private:
-
+	ThreadMessageQueue<Message>* mLogMsgQueue;
 };

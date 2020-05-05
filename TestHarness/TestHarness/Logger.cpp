@@ -16,7 +16,8 @@
 #include "Logger.h"
 #include <iostream>
 
-Logger::Logger()
+Logger::Logger(ThreadMessageQueue<Message>* msgQueue) :
+	mLogMsgQueue(msgQueue)
 {
 
 }

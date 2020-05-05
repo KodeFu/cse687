@@ -15,6 +15,7 @@
 
 #pragma once
 #include <iostream>
+#include "Logger.h"
 
 class TestHarness
 {
@@ -29,5 +30,7 @@ public:
 	void getMessage();									// Receive messages
 
 private:
+	Logger* mLogger;
+	ThreadMessageQueue<Message>* mLogMsgQueue;
 	
 };
