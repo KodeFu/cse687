@@ -10,6 +10,7 @@
 // Revision History:
 // Date			Programmer/Developer	Reason
 // 4/27/2020	David Pretola			Original
+// 5/07/2020	David Pretola			Added isEmpty() member function
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
@@ -64,6 +65,7 @@ public:
 	ThreadMessageQueue<T>& operator=(const ThreadMessageQueue<T>&) = delete; /* no assignment operation */
 	T Dequeue();
 	void Enqueue(T);
+	bool isEmpty();
 };
 
 /* The ThreadMessageQueue Constructor */
@@ -92,6 +94,14 @@ void ThreadMessageQueue<T>::Enqueue(T element)
 	unique_lock<std::mutex> lock{ enq_mtx }; /* lock the queue */
 	q.push(element);
 	deq_cond.notify_one(); /* inform the waiting threads of an enqueue */
+}
+
+template <typename T>
+bool ThreadMessageQueue<T>::isEmpty()
+{
+	unique_lock<std::mutex> lock{ enq_mtx }; /* lock the queue for the check */
+	unique_lock<std::mutex> lock{ deq_mtx };
+	return q.empty();
 }
 
 #endif
