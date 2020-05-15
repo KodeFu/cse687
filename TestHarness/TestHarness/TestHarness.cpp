@@ -173,7 +173,6 @@ int main()
 	testDllFuncName = msgD.functionName;
 	thread t3(Thread_Test_obj(), testDllName, testDllFuncName);
 
-	// wait for em
 	// t1.join();
 	// t2.join();
 	// t3.join();
