@@ -9,6 +9,9 @@
 #include "afxdialogex.h"
 #include "TestData.h"
 
+#include <thread>
+#include <string>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -16,6 +19,9 @@
 
 // prototype for the test functions
 typedef bool(__stdcall* testFunc)();
+
+// message glue
+#define WM_USER_LOG_MESSAGE  WM_USER + 1
 
 // CAboutDlg dialog used for App About
 
@@ -76,12 +82,13 @@ BEGIN_MESSAGE_MAP(CTestExecDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_LBN_DBLCLK(IDC_AVAILABLETESTS, &CTestExecDlg::OnLbnDblclkList1)
+	ON_LBN_DBLCLK(IDC_AVAILABLETESTS, &CTestExecDlg::OnLbnDblclkAvailableTests)
 	ON_BN_CLICKED(IDC_BROWSE, &CTestExecDlg::OnBnClickedBrowse)
 	ON_BN_CLICKED(IDC_COPYALL, &CTestExecDlg::OnBnClickedCopyall)
 	ON_BN_CLICKED(IDC_COPY, &CTestExecDlg::OnBnClickedCopy)
 	ON_BN_CLICKED(IDC_RESET, &CTestExecDlg::OnBnClickedReset)
 	ON_BN_CLICKED(IDC_RUNTESTS, &CTestExecDlg::OnBnClickedRuntests)
+	ON_MESSAGE(WM_USER_LOG_MESSAGE, OnUserDefinedMessage)
 END_MESSAGE_MAP()
 
 
@@ -117,6 +124,8 @@ BOOL CTestExecDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	std::thread first(logThread);
+	first.detach();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -172,13 +181,10 @@ HCURSOR CTestExecDlg::OnQueryDragIcon()
 
 
 
-void CTestExecDlg::OnLbnDblclkList1()
+void CTestExecDlg::OnLbnDblclkAvailableTests()
 {
 	// TODO: Add your control notification handler code here
-	int currSel = m_LoggerListBox.GetCurSel();
-	CString blah;
-	blah.Format(_T("Current Selection: %d"), currSel);
-	MessageBox(blah, L"Yo", MB_OK);
+	OnBnClickedCopy();
 }
 
 
@@ -192,8 +198,27 @@ void CTestExecDlg::OnBnClickedBrowse()
 	{
 		CString filePath = dlg.GetPathName();
 		CString fileName = dlg.GetFileName();
-		
-		GetFuncNamesFromDLL(filePath, fileName);
+
+		if (!fileName.IsEmpty())
+		{
+			// single selection
+			GetFuncNamesFromDLL(filePath, fileName);
+		}
+		else
+		{
+			// multiple selection
+			wchar_t* str = dlg.m_ofn.lpstrFile;
+			std::wstring directory = str;
+			str += (directory.length() + 1);
+			while (*str) 
+			{
+				std::wstring filename = str;
+				str += (filename.length() + 1);
+
+				CString fullFilePath = filePath + "\\" + filename.c_str();
+				GetFuncNamesFromDLL(fullFilePath, filename.c_str());
+			}
+		}
 	}
 
 }
@@ -309,4 +334,28 @@ void CTestExecDlg::OnBnClickedRuntests()
 			}
 		}
 	}
+}
+
+void CTestExecDlg::logThread()
+{
+	int a = 10;
+	
+	CString *b = new CString("Hello, here's a log message!");
+	CWnd *pMainWnd = AfxGetApp()->GetMainWnd();
+	if (pMainWnd)
+	{
+		pMainWnd->PostMessageW(WM_USER_LOG_MESSAGE, a, (LPARAM) b);
+	}
+
+	// TBD: while loop to check for new messages, if there is one, 
+	// dequeue and then PostMessage for the main thread to picku it
+	// up.
+}
+
+afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
+{
+	CString *cslParam = (CString *) lParam; 
+	m_LoggerListBox.AddString(cslParam->GetString());
+
+	return 0;
 }

@@ -34,7 +34,7 @@ protected:
 public:
 	CListBox m_LoggerListBox;
 	afx_msg void OnBnClickedButton1();
-	afx_msg void OnLbnDblclkList1();
+	afx_msg void OnLbnDblclkAvailableTests();
 	CListBox m_AvailableTests;
 	CListBox m_TestQueue;
 	afx_msg void OnBnClickedBrowse();
@@ -46,4 +46,10 @@ public:
 	afx_msg void OnBnClickedCopy();
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnBnClickedRuntests();
+
+private:
+	static void logThread();
+
+public:
+	afx_msg LRESULT OnUserDefinedMessage(WPARAM wParam, LPARAM lParam);
 };
