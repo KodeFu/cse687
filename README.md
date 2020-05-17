@@ -9,7 +9,11 @@ Repository for CSE687 Project. This repository consists of the following compone
 
 # Requirements
 - Visual Studio 2019
-    - Desktop development with C++
+- "Desktop development with C++"
+    - Selectable in the Workloads tab.
+- "C++ MFC for latest v142 build tools (x86 & x64)"
+    - Selectable in the Individual Components tab.
+    - This is required to build TestExec (GUI) which depends on  Microsoft Foudation Classes (MFC).
 
 # Build
 - Open TestHarness\TestHarness.sln
