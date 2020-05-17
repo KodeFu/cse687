@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestHarness", "TestHarness\TestHarness.vcxproj", "{6815D096-1786-428E-8C7E-AC0A60357720}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC6EAF10-5822-4414-B848-868C270C39D7} = {FC6EAF10-5822-4414-B848-868C270C39D7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestFuncsA", "..\TestFuncsA\TestFuncsA\TestFuncsA.vcxproj", "{FC6EAF10-5822-4414-B848-868C270C39D7}"
 EndProject
