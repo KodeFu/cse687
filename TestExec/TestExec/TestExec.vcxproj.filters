@@ -36,6 +36,12 @@
     <ClInclude Include="TestData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProcessMessageQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadMessageQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestExec.cpp">
@@ -48,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessMessageQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

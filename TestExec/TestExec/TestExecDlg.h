@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "ProcessMessageQueue.h"
 
 // CTestExecDlg dialog
 class CTestExecDlg : public CDialogEx
@@ -49,6 +49,7 @@ public:
 
 private:
 	static void logThread();
+	ProcessMessageQueue queue;
 
 public:
 	afx_msg LRESULT OnUserDefinedMessage(WPARAM wParam, LPARAM lParam);

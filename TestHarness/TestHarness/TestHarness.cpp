@@ -14,6 +14,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "ProcessMessageQueue.h"
 #include <iostream>
 #include <string>
 #include <Windows.h>
@@ -25,6 +26,7 @@
 #include "LogOutputQueue.h"
 #include "ChildTest.h"
 #include "ThreadMessageQueue.h"
+
 
 using namespace std;
 
@@ -92,6 +94,26 @@ public:
 
 int main()
 {
+	// Test ProcessMessageQueue
+	// Test ProcessMessageQueue
+	// Test ProcessMessageQueue
+	cout << "Waiting for TestExec() to connect.... " << endl;
+	ProcessMessageQueue queue;
+	queue.ServerListen("127.0.0.1", 5005);
+
+	while (true)
+	{
+		if (!queue.isEmpty())
+		{
+			Message procMsg = queue.Dequeue();
+			cout << procMsg.filePath << endl;
+			cout << procMsg.functionName << endl;
+		}
+	}
+	// Test ProcessMessageQueue
+	// Test ProcessMessageQueue
+	// Test ProcessMessageQueue
+
 	// TestRequestQueue tq;
 	ThreadMessageQueue<Message> tq;
 	ThreadMessageQueue<Message>* logQueue = new ThreadMessageQueue<Message>;

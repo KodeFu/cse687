@@ -127,6 +127,9 @@ BOOL CTestExecDlg::OnInitDialog()
 	std::thread first(logThread);
 	first.detach();
 
+	// Connect to the ProcessMessageQueue
+	queue.ClientConnect("127.0.0.1", 5005);
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -207,12 +210,12 @@ void CTestExecDlg::OnBnClickedBrowse()
 		else
 		{
 			// multiple selection
-			wchar_t* str = dlg.m_ofn.lpstrFile;
-			std::wstring directory = str;
+			char* str = dlg.m_ofn.lpstrFile;
+			std::string directory = str;
 			str += (directory.length() + 1);
 			while (*str) 
 			{
-				std::wstring filename = str;
+				std::string filename = str;
 				str += (filename.length() + 1);
 
 				CString fullFilePath = filePath + "\\" + filename.c_str();
@@ -327,10 +330,16 @@ void CTestExecDlg::OnBnClickedRuntests()
 				CString testName = testData->getTestName();
 				
 				// enqueue test using filePath, fileName, testName
-				// ...
 				m_LoggerListBox.AddString(filePath);
 				m_LoggerListBox.AddString(fileName);
 				m_LoggerListBox.AddString(testName);
+
+				// queue it up for the TestHarness
+				Message msg;
+				msg.filePath = filePath.GetString();
+				msg.functionName = testName.GetString();
+				queue.Enqueue(msg);
+
 			}
 		}
 	}
@@ -344,12 +353,13 @@ void CTestExecDlg::logThread()
 	CWnd *pMainWnd = AfxGetApp()->GetMainWnd();
 	if (pMainWnd)
 	{
-		pMainWnd->PostMessageW(WM_USER_LOG_MESSAGE, a, (LPARAM) b);
+		pMainWnd->PostMessage(WM_USER_LOG_MESSAGE, a, (LPARAM) b);
 	}
 
 	// TBD: while loop to check for new messages, if there is one, 
 	// dequeue and then PostMessage for the main thread to picku it
 	// up.
+
 }
 
 afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
