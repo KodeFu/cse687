@@ -186,19 +186,12 @@ copy /y /b  "$(OutDir)TestFuncsA.dll" "$(OutDir)TestFuncsC.dll"</Command>
   <ItemGroup>
     <ClCompile Include="ProcessMessageQueue.cpp" />
     <ClCompile Include="TestHarness.cpp" />
-    <ClCompile Include="ChildTest.cpp" />
     <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="TestRequestQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChildTest.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="LogOutputQueue.h" />
-    <ClInclude Include="Message.h" />
     <ClInclude Include="ProcessMessageQueue.h" />
-    <ClInclude Include="TestExecutive.h" />
     <ClInclude Include="TestHarness.h" />
-    <ClInclude Include="TestRequestQueue.h" />
     <ClInclude Include="ThreadMessageQueue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
