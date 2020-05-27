@@ -49,7 +49,8 @@ public:
 
 private:
 	static void logThread();
-	ProcessMessageQueue queue;
+	ProcessMessageQueue testQueue;
+	ProcessMessageQueue logQueue;
 
 public:
 	afx_msg LRESULT OnUserDefinedMessage(WPARAM wParam, LPARAM lParam);

@@ -15,18 +15,21 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "ProcessMessageQueue.h"
+#include "Shlwapi.h"
 #include <iostream>
 #include <string>
 #include <thread>
+#include <iomanip> 
 #include "TestHarness.h"
 #include "ThreadMessageQueue.h"
 
 using namespace std;
 
-#define THREAD_POOL_MAX 5 // number of threads in the thread pool
+#define MAX_BUFFER			256     // used for sprintfs
+#define THREAD_POOL_MAX		5		// number of threads in the thread pool
 
 // childTester function
-void childTester(ProcessMessageQueue& testQueue);
+void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue);
 
 // prototype for the test functions
 typedef bool(__stdcall* testFunc)();
@@ -34,10 +37,14 @@ typedef bool(__stdcall* testFunc)();
 
 int main()
 {
-	// wait for TestExec - do this in another thread?
-	cout << "Waiting for TestExec() to connect.... " << endl;
+	// create test queue
+	cout << GetCurrentThreadId() << ": waiting for TestExec() to connect... " << endl;
 	ProcessMessageQueue testQueue;
 	testQueue.ServerListen("127.0.0.1", 5005);
+
+	// create log queue
+	ProcessMessageQueue logQueue;
+	logQueue.ServerListen("127.0.0.1", 5006);
 
 	// Since this class isn't object oriented at the moment, just make a local logger
 	//ProcessMessageQueue logQueue;
@@ -45,42 +52,50 @@ int main()
 
 	for (int i = 0; i < THREAD_POOL_MAX; i++)
 	{
-		std::thread{ childTester, std::ref(testQueue) }.detach();
+		std::thread{ childTester, std::ref(testQueue), std::ref(logQueue) }.detach();
 	}
 	
-	cout << "return" << endl;
+	// wait for key press
 	cin.get();
 
 }
 
-void childTester(ProcessMessageQueue& testQueue)
+void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue)
 {
-	cout << "(" << GetCurrentThreadId() << ") " "started" << endl;
+	Message log;
+	char buf[MAX_BUFFER];;
 
+	// show starting thread and ids
+	cout << GetCurrentThreadId() << ": started thread" << endl;
+
+	// loop forever
 	while (true)
 	{
-		// Grab the first message off the queue, this is a blocking call
-		//cout << GetCurrentThreadId() << ": waiting for test..." << endl;
+		// check if there is a new test to execute
 		if (testQueue.isEmpty())
 		{
 			Sleep(1000);
 			continue;
 		}
 
+		// dequeue the test
 		Message msg = testQueue.Dequeue();
-
-		cout << "(" << GetCurrentThreadId() << ") " << "running test" << endl;
 
 		// Declare string variables for holding DLL and Function Name
 		std::string testDllName = msg.filePath;
-		std::string testDllFuncName = msg.functionName;;
+		std::string testDllFuncName = msg.functionName;
 
-		cout << "(" << GetCurrentThreadId() << ") " << testDllName << endl;
-		cout << "(" << GetCurrentThreadId() << ") " << testDllFuncName << endl;
-
-		// Instantiate the the child test object
-		//ChildTest childTest(NULL); // childTest(log);
+		// Need to get the filename from the path, so we can log it 
+		// Note: the message queue buffer size is small, so we needed
+		// to remove the path so there is no buffer overflow
+		char testDllShortName[MAX_BUFFER] = { 0 };
+		strncpy_s(testDllShortName, MAX_BUFFER, testDllName.c_str(), testDllName.size());
+		PathStripPathA(testDllShortName);
 		
+		snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "start test");
+		log.message = buf;
+		logQueue.Enqueue(log);
+
 		// get a handle to the test dll
 		HINSTANCE hTestDll = LoadLibraryA(testDllName.c_str());
 		if (hTestDll != NULL)
@@ -91,26 +106,45 @@ void childTester(ProcessMessageQueue& testQueue)
 				try
 				{
 					// call the test function
-					pTestFunc();
+					bool ret = pTestFunc();
+
+					// log pass / fail
+					(ret) ? snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "true (pass)") :
+						snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "false (failed)");
+
+					log.message = buf;
+					logQueue.Enqueue(log);
 				}
 				catch (...)
 				{
-					//mLogger->log(Logger::ERROR_E, "Exception!");
-					cout << "(" << GetCurrentThreadId() << ") " << "exception!" << endl;
+					// log exception
+					snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw an exception, but we caught it!");
+					log.message = buf;
+					logQueue.Enqueue(log);
 				}
 			}
 			else
 			{
-				std::cout << "(" << GetCurrentThreadId() << ") " << testDllName << " Couldn't find test function." << std::endl;
+				// log test function error
+				snprintf(buf, MAX_BUFFER, "%d:  %s %s %s, %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "couldn't find test function", testDllFuncName);
+				log.message = buf;
+				logQueue.Enqueue(log);
 			}
 
-			// free up the DLL after we're done using it
-			cout << "(" << GetCurrentThreadId() << ") " << "freeDLL" << endl;
+			// free up the DLL after we're done using it, done
+			snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "freeing dll, done");
+			log.message = buf;
+			logQueue.Enqueue(log);
+
 			FreeLibrary(hTestDll);
+			
 		}
 		else
 		{
-			std::cout << "(" << GetCurrentThreadId() << ") " << "TestHarness: Could Not find DLL: " << testDllName << std::endl;
+			// log dll error
+			snprintf(buf, MAX_BUFFER, "%d: %s %s %s, %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "coudn't find dll", testDllName);
+			log.message = buf;
+			logQueue.Enqueue(log);
 		}
 	}
 }

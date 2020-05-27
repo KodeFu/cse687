@@ -23,6 +23,9 @@ typedef bool(__stdcall* testFunc)();
 // message glue
 #define WM_USER_LOG_MESSAGE  WM_USER + 1
 
+// get a reference to logger
+ProcessMessageQueue *g_logQueue;
+
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -124,11 +127,17 @@ BOOL CTestExecDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+
+	// Connect to the test queue
+	testQueue.ClientConnect("127.0.0.1", 5005);
+
+	// Connect to the log queue
+	logQueue.ClientConnect("127.0.0.1", 5006);
+	g_logQueue = &logQueue;
+
+	// Start logging thread
 	std::thread first(logThread);
 	first.detach();
-
-	// Connect to the ProcessMessageQueue
-	queue.ClientConnect("127.0.0.1", 5005);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -330,15 +339,15 @@ void CTestExecDlg::OnBnClickedRuntests()
 				CString testName = testData->getTestName();
 				
 				// enqueue test using filePath, fileName, testName
-				m_LoggerListBox.AddString(filePath);
-				m_LoggerListBox.AddString(fileName);
-				m_LoggerListBox.AddString(testName);
+				//m_LoggerListBox.AddString(filePath);
+				//m_LoggerListBox.AddString(fileName);
+				//m_LoggerListBox.AddString(testName);
 
 				// queue it up for the TestHarness
 				Message msg;
 				msg.filePath = filePath.GetString();
 				msg.functionName = testName.GetString();
-				queue.Enqueue(msg);
+				testQueue.Enqueue(msg);
 
 			}
 		}
@@ -347,25 +356,41 @@ void CTestExecDlg::OnBnClickedRuntests()
 
 void CTestExecDlg::logThread()
 {
-	int a = 10;
-	
-	CString *b = new CString("Hello, here's a log message!");
-	CWnd *pMainWnd = AfxGetApp()->GetMainWnd();
+	CString* b = new CString("Hello Logger!");
+	CWnd* pMainWnd = AfxGetApp()->GetMainWnd();
 	if (pMainWnd)
 	{
-		pMainWnd->PostMessage(WM_USER_LOG_MESSAGE, a, (LPARAM) b);
+		pMainWnd->PostMessage(WM_USER_LOG_MESSAGE, NULL, (LPARAM)b);
 	}
 
-	// TBD: while loop to check for new messages, if there is one, 
-	// dequeue and then PostMessage for the main thread to picku it
-	// up.
+	// get log messages from the log queue from the Test Harness
+	while (true)
+	{
+		if (!g_logQueue->isEmpty())
+		{
+			Message msg = g_logQueue->Dequeue();
+
+			if (pMainWnd)
+			{
+				CString *b = new CString(msg.message.c_str());
+				pMainWnd->PostMessage(WM_USER_LOG_MESSAGE, NULL, (LPARAM)b);
+			}
+
+			Sleep(500);
+		}
+	}
 
 }
 
 afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
 {
 	CString *cslParam = (CString *) lParam; 
-	m_LoggerListBox.AddString(cslParam->GetString());
+
+	if (cslParam)
+	{
+		m_LoggerListBox.AddString(cslParam->GetString());
+		delete cslParam;
+	}
 
 	return 0;
 }
