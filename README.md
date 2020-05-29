@@ -4,11 +4,12 @@ Repository for CSE687 Project. This repository consists of the following compone
     - Main Test Harness executable
 - TestFuncsA
     - Test DLL
-- TestExec - *In progress*
+- TestExec
     - GUI for project 3+ 
 
 # Requirements
 - Visual Studio 2019
+- Use Windows Add/Remove programs to Modify Visual 2019 components
 - "Desktop development with C++"
     - Selectable in the Workloads tab.
 - "C++ MFC for latest v142 build tools (x86 & x64)"
