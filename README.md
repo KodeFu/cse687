@@ -15,7 +15,7 @@ Repository for CSE687 Project. This repository consists of the following compone
     - This will already be installed if C++ was selected at install time.
 - Add "C++ MFC for latest v142 build tools (x86 & x64)".
     - Selectable in the Individual Components tab (see image below).
-    - This is required to build TestExec (GUI) which depends on  Microsoft Foudation Classes (MFC).
+    - This is required to build TestExec (GUI) which depends on  Microsoft Foundation Classes (MFC).
 
 ![MFC](https://github.com/KodeFu/cse687/blob/master/Archive/mfc.png)
 
