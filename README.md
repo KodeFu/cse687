@@ -39,9 +39,11 @@ Since TestHarness acts as a server for the test queue and logging queue, it shou
 From TestExec, browse to a test dll (i.e. TestFuncsA.dll in the TestHarness\x64\Debug directory). Select the tests which you'd like to run - they will be moved to the test queue. Click on Run Tests.
 
 TestHarness runs as a console application and executes tests.
+
 ![TestHarness](https://github.com/KodeFu/cse687/blob/master/Archive/TestHarness.png)
 
 
-TestExec runs as a GUIL application and interacts with the user to select tests to execute and show log messages.
+TestExec runs as a GUI application and interacts with the user to select tests to execute and show log messages.
+
 ![TestExec](https://github.com/KodeFu/cse687/blob/master/Archive/TestExec.png)
 
