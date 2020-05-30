@@ -385,10 +385,15 @@ void CTestExecDlg::logThread()
 afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
 {
 	CString *cslParam = (CString *) lParam; 
+	CString friendlyMonth[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 	if (cslParam)
 	{
-		m_LoggerListBox.AddString(cslParam->GetString());
+		CTime t = CTime::GetCurrentTime();
+
+		CString formattedString;
+		formattedString.Format("%s %02d %02d:%02d:%02d %s", friendlyMonth[t.GetMonth()], t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond(), *cslParam);
+		m_LoggerListBox.AddString(formattedString);
 		delete cslParam;
 	}
 
