@@ -392,7 +392,7 @@ afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
 		CTime t = CTime::GetCurrentTime();
 
 		CString formattedString;
-		formattedString.Format("%s %02d %02d:%02d:%02d %s", friendlyMonth[t.GetMonth()], t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond(), *cslParam);
+		formattedString.Format("%s %02d %02d:%02d:%02d %s", friendlyMonth[t.GetMonth()-1], t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond(), *cslParam);
 		m_LoggerListBox.AddString(formattedString);
 		delete cslParam;
 	}
