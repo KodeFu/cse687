@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 * CSE 687 Object Oriented Programming Group Project
-* This package provides a Thread and Process Safe Queue.
+* This package provides a Thread Safe Queue.
 * Written by David Pretola
 */
 #ifndef __Q_H
@@ -41,7 +41,7 @@ struct Message
 	unsigned int destPort; /* message destination port */
 	string messageType; /* message type identifier */
 	string functionName; /* function name */
-	chrono::time_point<system_clock> timeStamp; /* The time for the message */
+	string timeStamp; /* The time for the message */
 	string filePath; /* the full file path to the test DLL */
 	unsigned int testNumber; /* the test number to execute */
 	string message; /* generic message data */

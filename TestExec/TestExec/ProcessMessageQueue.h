@@ -10,7 +10,7 @@
 // Revision History:
 // Date			Programmer/Developer	Reason
 // 5/26/2020	David Pretola			Original
-//
+// 6/03/2020	David Pretola			Added more comments
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 * CSE 687 Object Oriented Programming Group Project
@@ -19,7 +19,6 @@
 */
 #ifndef _PROCESS_MESSAGE_QUEUE_H
 #define _PROCESS_MESSAGE_QUEUE_H
-
 #define WIN32_LEAN_AND_MEAN
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <mutex>
@@ -36,6 +35,11 @@
 using namespace std;
 using namespace std::chrono;
 
+/*
+ * The ServerListenThread. This thread blocks in a detached state until a client
+ * socket for the ProcessMessageQueue connects. It then updates the specified
+ * qs socket and notifies any waiting threads through the sock_cond condition_variable.
+ */
 struct ServerListenThread
 {
 	void operator()(SOCKET* ls, SOCKET* qs, condition_variable * sock_cond);
@@ -75,7 +79,7 @@ struct MessageShort
 	unsigned int destPort; /* message destination port */
 	char messageType[90]; /* message type identifier */
 	char functionName[90]; /* function name */
-	long long timeStamp; /* The time for the message */
+	char timeStamp[90]; /* The time for the message */
 	char filePath[90]; /* the full file path to the test DLL */
 	unsigned int testNumber; /* the test number to execute */
 	char message[90]; /* generic message data */

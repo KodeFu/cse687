@@ -1,9 +1,31 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Author:  Archer_Howick_Pretola_Vats
+// CSE687_M400_Project01.cpp : Object Oriented Design
+// Syracuse University
+// Project
+// Requirements: See file Archer_Howick_Pretola_Vats_CSE687_Project1_ArchitectureDocx002.pdf for complete
+//		project requirements, architecture, and design.
+// Parameters:  None
+// Create Date:  4/22/2020
+// Revision History:
+// Date			Programmer/Developer	Reason
+// 5/27/2020	David Pretola			Original
+// 6/03/2020	David Pretola			Modified BinaryShortMessage to have a string timestamp field.
+// 6/03/2020	David Pretola			Added more comments
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+* CSE 687 Object Oriented Programming Group Project
+* This package provides a Process Safe Queue. The InterProcess Communication is performed over a socket.
+* Written by David Pretola
+*/
 #include "ProcessMessageQueue.h"
 #include "ThreadMessageQueue.h"
 #include <iostream>
-
 using namespace std;
-#pragma comment(lib, "Ws2_32.lib") /* this was required to link properly! */
+
+/* this was required to link properly! */
+#pragma comment(lib, "Ws2_32.lib")
 
 /* local prototypes */
 unique_ptr<MessageShort> binarySerialize(Message msg);
@@ -31,7 +53,7 @@ void ServerListenThread::operator()(SOCKET* ls, SOCKET* qs, condition_variable* 
 		std::cout << "Error in Accept call! " << strerror_s(msg, sizeof(msg), error) << " " << error << std::endl;
 	}
 	sock_cond->notify_one(); /* inform the waiting threads of a connection */
-	cout << "connected!" << endl; //DEBUG
+	cout << "ProcessMessageQueue connected!" << endl;
 }
 
 /* The MessageQueue Constructor */
@@ -62,7 +84,7 @@ ProcessMessageQueue::~ProcessMessageQueue()
 /*
  * Listen for a socket connection on the specified ip address and port number.
  * This is accomplished by launching a listening thread that listens for new
- * connections to the ListenSocket.
+ * connections to the ListenSocket. See ServerListen functor above.
 */
 void ProcessMessageQueue::ServerListen(string ip_str, int port_num)
 {
@@ -121,9 +143,14 @@ void ProcessMessageQueue::ClientConnect(string ip_str, int port_num)
 	}
 	QueueSocket = socket_s;
 	sock_cond.notify_one(); /* inform the waiting threads of a connection */
-	cout << "Connected!" << endl; //DEBUG
+	cout << "ProcessMessageQueue Connected!" << endl;
 }
 
+/*
+ * Standard Queue data structure Dequeue function. This call will block if the
+ * queue is not connected or no messages are available on the socket.
+ * Once a message is available, it is retreived and serialized into a Message type.
+ */
 Message ProcessMessageQueue::Dequeue()
 {
 
@@ -135,31 +162,38 @@ Message ProcessMessageQueue::Dequeue()
 	{
 		int error = errno;
 		char msg[256];
-		std::cout << "Error: " << strerror_s((char*)&msg, sizeof(msg), error) << error << std::endl;
+		std::cout << "Socket Revc Error: " << strerror_s((char*)&msg, sizeof(msg), error) << error << std::endl;
 	}
-	std::cout << "received " << size << " bytes" << std::endl;
+	std::cout << "ProcessMessageQueue received " << size << " bytes" << std::endl;
 	/* deserialize the T type instance */
 	Message return_message = binaryUnSeralize(&ele);
 	return return_message;
 }
 
+/*
+ * Standard queue Enqueue function. This function will block if the queue is not connected.
+ * The provided message is serialized and sent over the socket.
+*/
 void ProcessMessageQueue::Enqueue(Message element)
 {
 	unique_lock<std::mutex> lock{ enq_mtx }; /* lock the send call */
 	sock_cond.wait(lock, [this] {return QueueSocket != 0;}); /* wait until the socket is connected */
-	/* serialize the T type instance */
+	/* serialize the Message type instance */
 	unique_ptr<MessageShort> buffer = binarySerialize(element);
 	int size = send(QueueSocket, (char*)buffer.get(), sizeof(MessageShort), 0);
-	printf("after sending\n"); //DEBUG
 	if (size < 0)
 	{
 		int error = errno;
 		char msg[256];
-		std::cout << "Error " << strerror_s((char*)&msg, sizeof(msg), error) << error << std::endl;
+		std::cout << "Socket Send Error " << strerror_s((char*)&msg, sizeof(msg), error) << error << std::endl;
 	}
-	std::cout << "send " << size << " bytes " << std::endl; //DEBUG
+	std::cout << "ProcessMessageQueue sent " << size << " bytes " << std::endl;
 }
 
+/*
+ * Check if any messages are available on the socket. This function will block
+ * if the queue is not connected.
+*/
 bool ProcessMessageQueue::isEmpty()
 {
 	unique_lock<std::mutex> lock1{ enq_mtx }; /* lock for the check */
@@ -177,6 +211,9 @@ bool ProcessMessageQueue::isEmpty()
 	}
 }
 
+/*
+ * A helper function that seralizes the provided Message object into a MessageShort binary representation.
+ */
 unique_ptr<MessageShort> binarySerialize(Message msg)
 {
 	MessageShort * element = new MessageShort{};
@@ -186,7 +223,7 @@ unique_ptr<MessageShort> binarySerialize(Message msg)
 	element->destPort; /* message destination port */
 	strcpy_s(element->messageType,90,msg.messageType.c_str()); /* message type identifier */
 	strcpy_s(element->functionName,90,msg.functionName.c_str()); /* function name */
-	element->timeStamp = msg.timeStamp.time_since_epoch().count(); /* The time for the message */
+	strcpy_s(element->timeStamp, 90, msg.timeStamp.c_str()); /* The time for the message stored as a string*/
 	strcpy_s(element->filePath,90,msg.filePath.c_str()); /* the full file path to the test DLL */
 	element->testNumber = msg.testNumber; /* the test number to execute */
 	strcpy_s(element->message,90,msg.message.c_str()); /* generic message data */
@@ -194,9 +231,12 @@ unique_ptr<MessageShort> binarySerialize(Message msg)
 	return return_msg;
 }
 
+/*
+ * A helper function that deseralizes the provided MessageShort into a Message object.
+ */
 Message binaryUnSeralize(MessageShort * ele)
 {
-	Message msg;
+	Message msg{};
 	msg.sourceAddr = ele->sourceAddr;
 	msg.sourcePort = ele->sourcePort;
 	msg.destAddr = ele->destAddr;
