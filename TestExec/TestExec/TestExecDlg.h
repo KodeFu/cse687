@@ -1,7 +1,17 @@
-
-// TestExecDlg.h : header file
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Author:  Archer_Howick_Pretola_Vats
+// CSE687_M400_Project01.cpp : Object Oriented Design
+// Syracuse University
+// Project
+// Requirements: This file contains the header file for the TestExec Dialog-based GUI.
 //
-
+// Parameters:  None
+// Create Date:  4/25/2020
+// Revision History:
+// Date			Programmer/Developer	Reason
+// 4/22/2020	Mudit Vats				Original
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "ProcessMessageQueue.h"
 

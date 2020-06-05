@@ -1,6 +1,17 @@
-
-// TestExecDlg.cpp : implementation file
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Author:  Archer_Howick_Pretola_Vats
+// CSE687_M400_Project01.cpp : Object Oriented Design
+// Syracuse University
+// Project
+// Requirements: This file contains the 'main' function for the TestExec Dialog-based GUI.
 //
+// Parameters:  None
+// Create Date:  4/25/2020
+// Revision History:
+// Date			Programmer/Developer	Reason
+// 4/22/2020	Mudit Vats				Original
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 #include "framework.h"
@@ -91,7 +102,7 @@ BEGIN_MESSAGE_MAP(CTestExecDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_COPY, &CTestExecDlg::OnBnClickedCopy)
 	ON_BN_CLICKED(IDC_RESET, &CTestExecDlg::OnBnClickedReset)
 	ON_BN_CLICKED(IDC_RUNTESTS, &CTestExecDlg::OnBnClickedRuntests)
-	ON_MESSAGE(WM_USER_LOG_MESSAGE, OnUserDefinedMessage)
+	ON_MESSAGE(WM_USER_LOG_MESSAGE, OnUserDefinedMessage) // custom message to handle log PostMessages
 END_MESSAGE_MAP()
 
 
@@ -287,6 +298,7 @@ void CTestExecDlg::GetFuncNamesFromDLL(CString filePath, CString fileName)
 	}
 }
 
+// copy all tests
 void CTestExecDlg::OnBnClickedCopyall()
 {
 	if (m_AvailableTests.GetCount() > 0)
@@ -301,7 +313,7 @@ void CTestExecDlg::OnBnClickedCopyall()
 	}
 }
 
-
+// copy one test
 void CTestExecDlg::OnBnClickedCopy()
 {
 	if (m_AvailableTests.GetCount() > 0)
@@ -317,14 +329,14 @@ void CTestExecDlg::OnBnClickedCopy()
 	}
 }
 
-
+// reset availalbe tests and test queue
 void CTestExecDlg::OnBnClickedReset()
 {
 	m_AvailableTests.ResetContent();
 	m_TestQueue.ResetContent();
 }
 
-
+// run tests
 void CTestExecDlg::OnBnClickedRuntests()
 {
 	if (m_TestQueue.GetCount() > 0)
@@ -354,6 +366,8 @@ void CTestExecDlg::OnBnClickedRuntests()
 	}
 }
 
+// thread which polls for new log messages in the log queue and
+// if available, sends them to the log message handler
 void CTestExecDlg::logThread()
 {
 	CString* b = new CString("Hello Logger!");
@@ -382,6 +396,7 @@ void CTestExecDlg::logThread()
 
 }
 
+// log message handler to show log message
 afx_msg LRESULT CTestExecDlg::OnUserDefinedMessage(WPARAM wParam, LPARAM lParam)
 {
 	CString *cslParam = (CString *) lParam; 
