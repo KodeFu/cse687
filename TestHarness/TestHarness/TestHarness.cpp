@@ -115,10 +115,16 @@ void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue)
 					log.message = buf;
 					logQueue.Enqueue(log);
 				}
+				catch (int code) {
+					// log exception
+					snprintf(buf, MAX_BUFFER, "%d: %s %s %s 0x%X %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw exception", code, ", exception handled");
+					log.message = buf;
+					logQueue.Enqueue(log);
+				}
 				catch (...)
 				{
 					// log exception
-					snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw an exception, but we caught it!");
+					snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw a generic exception, exception handled");
 					log.message = buf;
 					logQueue.Enqueue(log);
 				}
