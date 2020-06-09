@@ -20,7 +20,6 @@
 #include <string>
 #include <thread>
 #include <iomanip> 
-#include "TestHarness.h"
 #include "ThreadMessageQueue.h"
 
 using namespace std;
@@ -45,10 +44,6 @@ int main()
 	// create log queue
 	ProcessMessageQueue logQueue;
 	logQueue.ServerListen("127.0.0.1", 5006);
-
-	// Since this class isn't object oriented at the moment, just make a local logger
-	//ProcessMessageQueue logQueue;
-	//Logger* log = new Logger(logQueue);
 
 	for (int i = 0; i < THREAD_POOL_MAX; i++)
 	{
