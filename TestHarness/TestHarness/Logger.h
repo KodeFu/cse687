@@ -16,7 +16,7 @@
 
 #pragma once
 #include <iostream>
-#include "ThreadMessageQueue.h"
+#include "ProcessMessageQueue.h"
 
 class Logger
 {
@@ -27,11 +27,12 @@ public:
 		DEBUG,
 		ERROR_E
 	};
-
-	Logger(ThreadMessageQueue<Message>* msgQueue);			// Constructor
+	//log message for a duration based on the time ex. Test 7 lasted 7 seconds! message for example
+	Logger(ProcessMessageQueue* msgQueue);			// Constructor
 	~Logger();												// Destructor
-	void log(LOG_LEVEL level, std::string messageFormat);	// log function.  Writes to log queue.
+	void log(LOG_LEVEL level, Message msg, std::string messageFormat);	// log function.  Writes to log queue.
+	std::string convertEnumToString(enum LOG_LEVEL level); // Convert the enum value into a string value
 
 private:
-	ThreadMessageQueue<Message>* mLogMsgQueue;
+	ProcessMessageQueue* mLogMsgQueue;
 };

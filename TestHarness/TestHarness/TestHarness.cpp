@@ -20,7 +20,9 @@
 #include <string>
 #include <thread>
 #include <iomanip> 
+#include <chrono>
 #include "ThreadMessageQueue.h"
+#include "Logger.h"
 
 using namespace std;
 
@@ -28,11 +30,12 @@ using namespace std;
 #define THREAD_POOL_MAX		5		// number of threads in the thread pool
 
 // childTester function
-void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue);
+void childTester(ProcessMessageQueue & testQueue, ProcessMessageQueue & logQueue);
 
 // prototype for the test functions
 typedef bool(__stdcall* testFunc)();
 
+Logger* mLogger;
 
 int main()
 {
@@ -45,11 +48,15 @@ int main()
 	ProcessMessageQueue logQueue;
 	logQueue.ServerListen("127.0.0.1", 5006);
 
+	// Since this class isn't object oriented at the moment, just make a local logger
+	//ProcessMessageQueue logQueue;
+	mLogger = new Logger(&logQueue);
+
 	for (int i = 0; i < THREAD_POOL_MAX; i++)
 	{
 		std::thread{ childTester, std::ref(testQueue), std::ref(logQueue) }.detach();
 	}
-	
+
 	// wait for key press
 	cin.get();
 
@@ -57,13 +64,13 @@ int main()
 
 void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue)
 {
-	Message log;
+	Message logMsg;
 	char buf[MAX_BUFFER];;
 
-	// show starting thread and ids
+	// Show starting thread and ids
 	cout << GetCurrentThreadId() << ": started thread" << endl;
 
-	// loop forever
+	// Loop forever
 	while (true)
 	{
 		// check if there is a new test to execute
@@ -73,7 +80,7 @@ void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue)
 			continue;
 		}
 
-		// dequeue the test
+		// Dequeue the test
 		Message msg = testQueue.Dequeue();
 
 		// Declare string variables for holding DLL and Function Name
@@ -86,66 +93,80 @@ void childTester(ProcessMessageQueue& testQueue, ProcessMessageQueue& logQueue)
 		char testDllShortName[MAX_BUFFER] = { 0 };
 		strncpy_s(testDllShortName, MAX_BUFFER, testDllName.c_str(), testDllName.size());
 		PathStripPathA(testDllShortName);
-		
-		snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "start test");
-		log.message = buf;
-		logQueue.Enqueue(log);
 
-		// get a handle to the test dll
+		// Build string to log
+		snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "start test.");
+
+		// Log the start of the test
+		mLogger->log(Logger::INFO, logMsg, buf);
+
+		// Get a handle to the test dll
 		HINSTANCE hTestDll = LoadLibraryA(testDllName.c_str());
 		if (hTestDll != NULL)
 		{
+			// Beginning of timer
+			auto start = chrono::steady_clock::now();
+			// Get the test function
 			testFunc pTestFunc = (testFunc)GetProcAddress(hTestDll, testDllFuncName.c_str());
 			if (NULL != pTestFunc)
 			{
 				try
 				{
-					// call the test function
+					// Call the test function
 					bool ret = pTestFunc();
 
-					// log pass / fail
-					(ret) ? snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "true (pass)") :
-						snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "false (failed)");
+					// Build string to log
+					(ret) ? snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "true (pass).") :
+						snprintf(buf, MAX_BUFFER, "%d: %s %s test function returned %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "false (failed).");
 
-					log.message = buf;
-					logQueue.Enqueue(log);
+					// Log pass / fail
+					mLogger->log(Logger::INFO, logMsg, buf);
 				}
 				catch (int code) {
-					// log exception
-					snprintf(buf, MAX_BUFFER, "%d: %s %s %s 0x%X %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw exception", code, ", exception handled");
-					log.message = buf;
-					logQueue.Enqueue(log);
+					// Build string to log
+					snprintf(buf, MAX_BUFFER, "%d: %s %s %s 0x%X %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "threw exception", code, ", exception handled.");
+
+					// Log exception
+					mLogger->log(Logger::ERROR_E, logMsg, buf);
 				}
 				catch (...)
 				{
-					// log exception
-					snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw a generic exception, exception handled");
-					log.message = buf;
-					logQueue.Enqueue(log);
+					// Build string to log
+					snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "test function threw a generic exception, exception handled.");
+
+					// Log exception
+					mLogger->log(Logger::ERROR_E, logMsg, buf);
 				}
 			}
 			else
 			{
-				// log test function error
-				snprintf(buf, MAX_BUFFER, "%d:  %s %s %s, %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "couldn't find test function", testDllFuncName);
-				log.message = buf;
-				logQueue.Enqueue(log);
+				// Build string to log
+				snprintf(buf, MAX_BUFFER, "%d:  %s %s %s, %s.", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "couldn't find test function", testDllFuncName);
+
+				// Log test function error
+				mLogger->log(Logger::ERROR_E, logMsg, buf);
 			}
 
-			// free up the DLL after we're done using it, done
-			snprintf(buf, MAX_BUFFER, "%d: %s %s %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "freeing dll, done");
-			log.message = buf;
-			logQueue.Enqueue(log);
+			// End the timer
+			auto end = chrono::steady_clock::now();
 
+			// Build string to log
+			snprintf(buf, MAX_BUFFER, "%d: %s %s %s %d.", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "freeing dll, done. Duration (ms): ", (int)chrono::duration_cast<chrono::milliseconds>(end - start).count());
+
+			// Free up the DLL after we're done using it, done
+			mLogger->log(Logger::INFO, logMsg, buf);
+
+			//Free the shared object
 			FreeLibrary(hTestDll);
-			
+
 		}
 		else
 		{
-			// log dll error
+			// Build string to log
 			snprintf(buf, MAX_BUFFER, "%d: %s %s %s, %s", GetCurrentThreadId(), testDllShortName, testDllFuncName.c_str(), "coudn't find dll", testDllName);
-			log.message = buf;
-			logQueue.Enqueue(log);
+
+			// Log dll error
+			mLogger->log(Logger::INFO, logMsg, buf);
 		}
 	}
 }
